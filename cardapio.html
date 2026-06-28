@@ -1,554 +1,1287 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cardápio - Fritz</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FRITZ - Cardápio Digital</title>
+<style>
+/* ============================================================
+   FONTS
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;600;700;800&display=swap');
 
-        :root {
-            --bg: #1a1a2e;
-            --card: #16213e;
-            --accent: #e94560;
-            --accent2: #f5a623;
-            --text: #ffffff;
-            --text-muted: #a0a0b8;
-            --border: #2a2a4a;
-        }
+/* ============================================================
+   RESET & ROOT
+   ============================================================ */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-        }
+:root {
+  --pink:#e94560;
+  --pink-dark:#c23152;
+  --gold:#f5a623;
+  --gold-light:#ffd700;
+  --bg:#0d0d1a;
+  --bg2:#141428;
+  --card:rgba(22,33,62,0.85);
+  --glass:rgba(255,255,255,0.06);
+  --glass-border:rgba(255,255,255,0.10);
+  --text:#ffffff;
+  --text-muted:#9a9ab8;
+  --shadow:0 8px 32px rgba(0,0,0,0.5);
+  --radius:16px;
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
 
-        /* HEADER */
-        .header {
-            background: linear-gradient(135deg, #e94560 0%, #c23152 50%, #0f3460 100%);
-            padding: 40px 20px 30px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
-            animation: pulse 4s ease-in-out infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        .header h1 {
-            font-size: 2.8rem;
-            font-weight: 800;
-            letter-spacing: 2px;
-            position: relative;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
-        }
-        .header h1 span { color: #f5a623; }
-        .header p {
-            position: relative;
-            margin-top: 8px;
-            font-size: 1.1rem;
-            opacity: 0.9;
-            letter-spacing: 1px;
-        }
+body {
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+  width:100%;
+}
 
-        /* NAVEGAÇÃO CATEGORIAS */
-        .nav-wrapper {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: var(--bg);
-            border-bottom: 1px solid var(--border);
-        }
-        .nav-categories {
-            display: flex;
-            gap: 8px;
-            padding: 12px 16px;
-            overflow-x: auto;
-            scrollbar-width: thin;
-            scrollbar-color: var(--accent) var(--border);
-            -webkit-overflow-scrolling: touch;
-        }
-        .nav-categories::-webkit-scrollbar { height: 4px; }
-        .nav-categories::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
-        .nav-categories::-webkit-scrollbar-track { background: var(--border); }
+/* ============================================================
+   SPLASH SCREEN
+   ============================================================ */
+.splash {
+  position:fixed;inset:0;z-index:9999;
+  background:radial-gradient(ellipse at 50% 40%, #1a0a2e 0%, #0d0d1a 70%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:opacity 0.8s ease, transform 0.8s ease;
+}
+.splash.hidden {opacity:0;transform:scale(1.15);pointer-events:none}
 
-        .nav-btn {
-            flex: 0 0 auto;
-            padding: 8px 18px;
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            background: transparent;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.3s ease;
-        }
-        .nav-btn:hover, .nav-btn.active {
-            background: var(--accent);
-            color: #fff;
-            border-color: var(--accent);
-            transform: translateY(-1px);
-        }
+.splash-logo {
+  width:140px;height:140px;
+  background:linear-gradient(135deg,var(--pink),var(--gold));
+  border-radius:32px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 60px rgba(233,69,96,0.3), 0 0 120px rgba(246,166,35,0.15);
+  animation:splashPulse 2s ease-in-out infinite;
+  position:relative;
+}
+.splash-logo::after {
+  content:'';position:absolute;inset:-4px;
+  border-radius:36px;
+  background:linear-gradient(135deg,var(--pink),var(--gold),var(--pink));
+  z-index:-1;opacity:0.5;animation:splashGlow 2s linear infinite;
+}
+@keyframes splashGlow {0%,100%{opacity:.4}50%{opacity:.8}}
+@keyframes splashPulse {0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.splash-logo span {
+  font-family:'Playfair Display',serif;
+  font-size:4rem;font-weight:900;
+  background:linear-gradient(135deg,#fff 30%,var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+}
+.splash-title {
+  margin-top:28px;
+  font-family:'Playfair Display',serif;
+  font-size:2rem;font-weight:700;
+  letter-spacing:4px;text-transform:uppercase;
+  background:linear-gradient(135deg,var(--pink),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.splash-sub {
+  margin-top:8px;font-size:0.9rem;color:var(--text-muted);letter-spacing:2px;
+}
+.splash-loader {
+  margin-top:40px;width:160px;height:3px;border-radius:3px;
+  background:var(--glass);overflow:hidden;
+}
+.splash-loader-bar {
+  height:100%;width:0%;border-radius:3px;
+  background:linear-gradient(90deg,var(--pink),var(--gold));
+  animation:splashLoad 1.8s ease-in-out forwards;
+}
+@keyframes splashLoad {0%{width:0%}100%{width:100%}}
 
-        /* CONTEÚDO */
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px 16px 40px;
-        }
+/* ============================================================
+   HEADER
+   ============================================================ */
+.header {
+  background:linear-gradient(135deg, #1a0a2e 0%, var(--pink-dark) 40%, #0f3460 100%);
+  padding:48px 20px 28px;
+  text-align:center;position:relative;overflow:hidden;
+}
+.header::before {
+  content:'';position:absolute;top:-60%;left:-50%;width:200%;height:200%;
+  background:radial-gradient(circle,rgba(255,255,255,0.04) 0%,transparent 60%);
+  animation:headerPulse 5s ease-in-out infinite;
+}
+@keyframes headerPulse {0%,100%{transform:translate(0,0)}50%{transform:translate(-10%,10%)}}
 
-        .categoria {
-            display: none;
-            animation: fadeIn 0.4s ease;
-        }
-        .categoria.active { display: block; }
+.header-logo {
+  width:72px;height:72px;margin:0 auto 12px;
+  background:linear-gradient(135deg,var(--pink),var(--gold));
+  border-radius:18px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 24px rgba(233,69,96,0.35);
+  position:relative;
+}
+.header-logo span {
+  font-family:'Playfair Display',serif;
+  font-size:2rem;font-weight:900;
+  color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.3);
+}
+.header h1 {
+  font-family:'Playfair Display',serif;
+  font-size:1.8rem;font-weight:700;letter-spacing:3px;
+  position:relative;text-shadow:0 2px 12px rgba(0,0,0,0.3);
+}
+.header h1 span {color:var(--gold)}
+.header p {
+  position:relative;margin-top:6px;font-size:0.95rem;opacity:0.85;letter-spacing:1px;
+}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+/* ============================================================
+   SEARCH BAR
+   ============================================================ */
+.search-wrap {
+  padding:12px 16px;background:var(--bg);
+  position:sticky;top:0;z-index:50;
+}
+.search-box {
+  display:flex;align-items:center;gap:10px;
+  background:var(--card);backdrop-filter:blur(12px);
+  border:1px solid var(--glass-border);
+  border-radius:14px;padding:10px 16px;
+}
+.search-box:focus-within {border-color:var(--pink);box-shadow:0 0 20px rgba(233,69,96,0.15)}
+.search-box input {
+  flex:1;background:none;border:none;outline:none;
+  color:var(--text);font-size:0.95rem;font-family:'Inter',sans-serif;
+}
+.search-box input::placeholder {color:var(--text-muted)}
+.search-box .search-icon {font-size:1.2rem;opacity:0.5}
 
-        .cat-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid var(--accent);
-        }
-        .cat-header .icon {
-            font-size: 1.8rem;
-        }
-        .cat-header h2 {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--accent2);
-        }
-        .cat-header .count {
-            margin-left: auto;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            background: var(--card);
-            padding: 4px 12px;
-            border-radius: 12px;
-        }
+/* ============================================================
+   NAV CATEGORIES
+   ============================================================ */
+.nav-wrapper {
+  background:var(--bg);
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  padding:0 16px 12px;
+}
+.nav-categories {
+  display:flex;gap:8px;overflow-x:auto;
+  scrollbar-width:none;-ms-overflow-style:none;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:4px;
+}
+.nav-categories::-webkit-scrollbar {display:none}
+.nav-btn {
+  flex:0 0 auto;padding:8px 16px;border-radius:20px;
+  border:1px solid var(--glass-border);background:var(--glass);
+  color:var(--text-muted);font-size:0.78rem;font-weight:600;
+  cursor:pointer;white-space:nowrap;
+  transition:all 0.3s cubic-bezier(.4,0,.2,1);
+  backdrop-filter:blur(8px);font-family:'Inter',sans-serif;
+}
+.nav-btn:hover,.nav-btn.active {
+  background:linear-gradient(135deg,var(--pink),var(--pink-dark));
+  color:#fff;border-color:transparent;
+  transform:translateY(-1px);box-shadow:0 4px 16px rgba(233,69,96,0.25);
+}
+.nav-btn .nav-icon {margin-right:4px}
 
-        .item {
-            background: var(--card);
-            border-radius: 12px;
-            padding: 16px 18px;
-            margin-bottom: 12px;
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 12px;
-        }
-        .item:hover {
-            border-color: var(--accent);
-            transform: translateX(4px);
-            box-shadow: 0 4px 20px rgba(233,69,96,0.1);
-        }
+/* ============================================================
+   CONTAINER / CATEGORIAS
+   ============================================================ */
+.container {
+  max-width:900px;margin:0 auto;padding:16px 16px 120px;
+}
+.categoria {display:none;animation:fadeUp 0.45s cubic-bezier(.4,0,.2,1)}
+.categoria.active {display:block}
+@keyframes fadeUp {from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
-        .item-info { flex: 1; }
-        .item-nome {
-            font-size: 1.05rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        .item-desc {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            line-height: 1.4;
-        }
-        .item-preco {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--accent2);
-            white-space: nowrap;
-            padding-top: 2px;
-        }
+.cat-header {
+  display:flex;align-items:center;gap:12px;margin-bottom:16px;
+  padding-bottom:12px;border-bottom:2px solid var(--pink);
+}
+.cat-header .icon {font-size:1.6rem}
+.cat-header h2 {
+  font-family:'Playfair Display',serif;
+  font-size:1.4rem;font-weight:700;color:var(--gold);
+}
+.cat-header .count {
+  margin-left:auto;font-size:0.78rem;color:var(--text-muted);
+  background:var(--glass);padding:4px 12px;border-radius:20px;
+  border:1px solid var(--glass-border);
+}
 
-        /* BOTÃO WHATSAPP */
-        .whatsapp-float {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: #25D366;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 20px rgba(37,211,102,0.4);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            z-index: 200;
-            border: none;
-            color: white;
-            font-size: 28px;
-            text-decoration: none;
-        }
-        .whatsapp-float:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 30px rgba(37,211,102,0.6);
-        }
+/* ============================================================
+   ITEM CARD
+   ============================================================ */
+.item {
+  background:var(--card);backdrop-filter:blur(12px);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);padding:14px 16px;
+  margin-bottom:12px;
+  display:flex;align-items:center;gap:14px;
+  cursor:pointer;position:relative;overflow:hidden;
+  transition:all 0.3s cubic-bezier(.4,0,.2,1);
+}
+.item:active {transform:scale(0.98)}
+.item:hover {border-color:rgba(233,69,96,0.4);box-shadow:0 4px 24px rgba(233,69,96,0.08)}
+.item::before {
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--pink),transparent);
+  opacity:0;transition:opacity 0.3s;
+}
+.item:hover::before {opacity:1}
 
-        /* RESPONSIVO */
-        @media (max-width: 600px) {
-            .header h1 { font-size: 2rem; }
-            .header p { font-size: 0.95rem; }
-            .nav-categories { padding: 10px 12px; }
-            .nav-btn { padding: 6px 14px; font-size: 0.8rem; }
-            .item { padding: 14px; }
-            .item-nome { font-size: 0.95rem; }
-            .item-preco { font-size: 1rem; }
-            .whatsapp-float { width: 52px; height: 52px; font-size: 24px; bottom: 18px; right: 18px; }
-        }
-    </style>
+/* Logo FR em cada item */
+.item-logo {
+  width:44px;height:44px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--pink),var(--gold));
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 12px rgba(233,69,96,0.25);
+  transition:transform 0.3s;
+}
+.item:hover .item-logo {transform:rotate(-5deg) scale(1.05)}
+.item-logo span {
+  font-family:'Playfair Display',serif;
+  font-size:1rem;font-weight:900;
+  color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.3);
+}
+
+.item-info {flex:1;min-width:0}
+.item-nome {
+  font-size:0.95rem;font-weight:700;
+  display:flex;align-items:center;gap:6px;
+}
+.item-nome .badge {
+  font-size:0.55rem;padding:2px 8px;border-radius:10px;
+  background:var(--pink);color:#fff;font-weight:600;
+  letter-spacing:0.5px;
+}
+.item-desc {
+  font-size:0.8rem;color:var(--text-muted);line-height:1.4;margin-top:2px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.item-bottom {
+  display:flex;align-items:center;gap:10px;margin-top:6px;
+}
+.item-preco {
+  font-size:1.05rem;font-weight:800;
+  background:linear-gradient(135deg,var(--gold),var(--gold-light));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.item-btn-add {
+  padding:4px 14px;border-radius:20px;border:none;
+  background:linear-gradient(135deg,var(--pink),var(--pink-dark));
+  color:#fff;font-size:0.75rem;font-weight:700;
+  cursor:pointer;transition:all 0.3s;
+  font-family:'Inter',sans-serif;
+}
+.item-btn-add:active {transform:scale(0.92)}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.empty-state {
+  text-align:center;padding:48px 20px;color:var(--text-muted);
+}
+.empty-state .empty-icon {font-size:3rem;margin-bottom:12px;opacity:0.5}
+.empty-state p {font-size:0.95rem}
+
+/* ============================================================
+   MODAL — DETALHE DO PRODUTO
+   ============================================================ */
+.modal-overlay {
+  position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);
+  display:none;align-items:flex-end;justify-content:center;
+}
+.modal-overlay.open {display:flex}
+@keyframes modalUp {from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+.modal {
+  width:100%;max-width:480px;
+  background:linear-gradient(180deg,var(--bg2) 0%,var(--bg) 100%);
+  border-radius:24px 24px 0 0;
+  padding:24px 20px calc(24px + var(--safe-bottom));
+  animation:modalUp 0.4s cubic-bezier(.22,1,.36,1);
+  position:relative;max-height:92vh;overflow-y:auto;
+}
+.modal-handle {
+  width:40px;height:4px;border-radius:4px;
+  background:var(--glass-border);margin:0 auto 16px;
+}
+.modal-logo {
+  width:64px;height:64px;margin:0 auto 16px;
+  background:linear-gradient(135deg,var(--pink),var(--gold));
+  border-radius:18px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(233,69,96,0.3);
+}
+.modal-logo span {
+  font-family:'Playfair Display',serif;
+  font-size:1.6rem;font-weight:900;color:#fff;
+}
+.modal h3 {
+  font-family:'Playfair Display',serif;
+  font-size:1.6rem;font-weight:700;text-align:center;
+}
+.modal .modal-cat {
+  text-align:center;font-size:0.8rem;color:var(--text-muted);margin-top:2px;letter-spacing:1px;
+}
+.modal .modal-desc {
+  text-align:center;color:var(--text-muted);font-size:0.9rem;
+  margin:12px 0 20px;line-height:1.5;
+}
+.modal .modal-preco {
+  text-align:center;font-size:1.8rem;font-weight:800;
+  background:linear-gradient(135deg,var(--gold),var(--gold-light));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:20px;
+}
+
+/* Qty selector */
+.qty-wrap {
+  display:flex;align-items:center;justify-content:center;gap:16px;
+  margin-bottom:20px;
+}
+.qty-btn {
+  width:44px;height:44px;border-radius:50%;
+  border:1px solid var(--glass-border);background:var(--glass);
+  color:#fff;font-size:1.3rem;font-weight:300;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;font-family:'Inter',sans-serif;
+}
+.qty-btn:active {transform:scale(0.9)}
+.qty-btn.minus:active {background:var(--pink);border-color:var(--pink)}
+.qty-btn.plus:active {background:var(--gold);border-color:var(--gold)}
+.qty-num {
+  font-size:1.5rem;font-weight:700;min-width:40px;text-align:center;
+}
+
+/* Subtotal no modal */
+.modal-subtotal {
+  text-align:center;font-size:0.9rem;color:var(--text-muted);margin-bottom:16px;
+}
+.modal-subtotal strong {color:var(--gold);font-size:1.1rem}
+
+.modal-actions {
+  display:flex;gap:10px;
+}
+.modal-actions button {
+  flex:1;padding:14px;border-radius:14px;border:none;
+  font-weight:700;font-size:0.95rem;cursor:pointer;font-family:'Inter',sans-serif;
+  transition:all 0.2s;
+}
+.modal-actions button:active {transform:scale(0.97)}
+.btn-cart {
+  background:linear-gradient(135deg,var(--pink),var(--pink-dark));
+  color:#fff;box-shadow:0 4px 16px rgba(233,69,96,0.3);
+}
+.btn-reserve {
+  background:linear-gradient(135deg,var(--gold),#d4891a);
+  color:#fff;box-shadow:0 4px 16px rgba(246,166,35,0.3);
+}
+.btn-close-modal {
+  background:var(--glass);color:var(--text-muted);border:1px solid var(--glass-border);
+}
+
+/* ============================================================
+   CART BUTTON (FLOAT)
+   ============================================================ */
+.cart-float {
+  position:fixed;bottom:calc(24px + var(--safe-bottom));right:20px;z-index:200;
+  width:60px;height:60px;border-radius:50%;
+  background:linear-gradient(135deg,var(--pink),var(--pink-dark));
+  border:none;color:#fff;font-size:1.5rem;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 24px rgba(233,69,96,0.4);
+  cursor:pointer;transition:all 0.3s cubic-bezier(.4,0,.2,1);
+}
+.cart-float:active {transform:scale(0.9)}
+.cart-badge {
+  position:absolute;top:-4px;right:-4px;
+  min-width:22px;height:22px;border-radius:11px;
+  background:var(--gold);color:#000;font-size:0.7rem;font-weight:800;
+  display:none;align-items:center;justify-content:center;
+  padding:0 5px;border:2px solid var(--bg);
+}
+
+/* ============================================================
+   WHATSAPP FLOAT
+   ============================================================ */
+.whatsapp-float {
+  position:fixed;bottom:calc(96px + var(--safe-bottom));right:20px;z-index:200;
+  width:60px;height:60px;border-radius:50%;
+  background:#25D366;
+  display:none;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(37,211,102,0.4);
+  cursor:pointer;transition:all 0.3s;border:none;color:#fff;
+  font-size:1.5rem;text-decoration:none;
+}
+.whatsapp-float:active {transform:scale(0.9)}
+.whatsapp-float.visible {display:flex !important}
+
+/* ============================================================
+   CART PAGE (full screen)
+   ============================================================ */
+.cart-page {
+  position:fixed;inset:0;z-index:500;
+  background:var(--bg);
+  display:none;flex-direction:column;
+  animation:fadeUp 0.35s cubic-bezier(.4,0,.2,1);
+}
+.cart-page.open {display:flex}
+
+.cart-header {
+  display:flex;align-items:center;gap:12px;
+  padding:48px 16px 12px;
+  background:linear-gradient(135deg,#1a0a2e 0%,var(--pink-dark) 100%);
+}
+.cart-header .back-btn {
+  background:none;border:none;color:#fff;font-size:1.3rem;cursor:pointer;
+  width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;
+}
+.cart-header .back-btn:active {background:rgba(255,255,255,0.1)}
+.cart-header h2 {
+  font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;flex:1;
+}
+.cart-header .clear-btn {
+  background:rgba(255,255,255,0.1);border:none;color:rgba(255,255,255,0.7);
+  padding:8px 14px;border-radius:10px;font-size:0.8rem;cursor:pointer;font-family:'Inter',sans-serif;
+}
+
+.cart-items {
+  flex:1;overflow-y:auto;padding:16px;
+}
+.cart-empty {
+  text-align:center;padding:60px 20px;color:var(--text-muted);
+}
+.cart-empty .empty-icon {font-size:3.5rem;margin-bottom:12px;opacity:0.4}
+.cart-empty p {font-size:0.9rem}
+
+.cart-item {
+  display:flex;align-items:center;gap:12px;
+  background:var(--card);border-radius:14px;padding:12px 14px;
+  margin-bottom:10px;border:1px solid var(--glass-border);
+}
+.cart-item-logo {
+  width:36px;height:36px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--pink),var(--gold));
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+}
+.cart-item-logo span {
+  font-family:'Playfair Display',serif;font-size:0.8rem;font-weight:900;color:#fff;
+}
+.cart-item-info {flex:1}
+.cart-item-info .cinome {font-weight:600;font-size:0.9rem}
+.cart-item-info .cipreco {font-size:0.82rem;color:var(--text-muted)}
+.cart-item-qty {
+  display:flex;align-items:center;gap:8px;
+}
+.cart-item-qty button {
+  width:28px;height:28px;border-radius:50%;
+  border:1px solid var(--glass-border);background:var(--glass);
+  color:#fff;font-size:0.8rem;cursor:pointer;font-family:'Inter',sans-serif;
+  display:flex;align-items:center;justify-content:center;
+}
+.cart-item-qty button:active {transform:scale(0.88)}
+.cart-item-qty span {font-weight:700;min-width:20px;text-align:center;font-size:0.9rem}
+.cart-item-remove {
+  background:none;border:none;color:var(--text-muted);font-size:1.1rem;
+  cursor:pointer;padding:4px;
+}
+
+/* Footer do carrinho com calculadora */
+.cart-footer {
+  background:var(--card);backdrop-filter:blur(12px);
+  border-top:1px solid var(--glass-border);
+  padding:16px 16px calc(16px + var(--safe-bottom));
+}
+.cart-footer .calc-row {
+  display:flex;justify-content:space-between;align-items:center;
+  padding:4px 0;font-size:0.88rem;color:var(--text-muted);
+}
+.cart-footer .calc-row.total {
+  font-size:1.15rem;font-weight:700;color:var(--gold);
+  border-top:1px solid var(--glass-border);padding-top:10px;margin-top:4px;
+}
+.cart-footer .calc-row.taxa {font-size:0.78rem}
+.cart-footer .calc-row .value {color:var(--text)}
+.cart-footer .calc-row.total .value {
+  background:linear-gradient(135deg,var(--gold),var(--gold-light));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  font-size:1.25rem;
+}
+.cart-checkout {
+  width:100%;margin-top:10px;padding:16px;
+  border-radius:14px;border:none;
+  background:linear-gradient(135deg,#25D366,#128C7E);
+  color:#fff;font-size:1rem;font-weight:700;
+  cursor:pointer;transition:all 0.2s;
+  font-family:'Inter',sans-serif;box-shadow:0 4px 16px rgba(37,211,102,0.3);
+}
+.cart-checkout:active {transform:scale(0.98)}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast {
+  position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);
+  z-index:600;
+  padding:12px 24px;border-radius:12px;
+  background:var(--card);backdrop-filter:blur(16px);
+  border:1px solid var(--glass-border);
+  color:#fff;font-size:0.85rem;font-weight:600;
+  box-shadow:var(--shadow);
+  opacity:0;transition:all 0.4s cubic-bezier(.4,0,.2,1);
+  pointer-events:none;white-space:nowrap;
+}
+.toast.show {opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .toast-icon {margin-right:6px}
+
+/* ============================================================
+   ANIMAÇÃO ADICIONAL
+   ============================================================ */
+.shimmer {
+  background:linear-gradient(90deg,var(--glass) 25%,rgba(255,255,255,0.04) 50%,var(--glass) 75%);
+  background-size:200% 100%;animation:shimmer 2s infinite;
+}
+@keyframes shimmer {0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (min-width:768px) {
+  .header{padding:60px 20px 36px}
+  .header-logo{width:88px;height:88px}
+  .header-logo span{font-size:2.4rem}
+  .header h1{font-size:2.4rem}
+  .container{padding:20px 20px 100px}
+  .item{padding:16px 20px}
+  .item-logo{width:50px;height:50px}
+  .item-logo span{font-size:1.1rem}
+  .item-nome{font-size:1rem}
+  .modal{max-width:420px;border-radius:28px;margin:auto 16px;animation:none;max-height:90vh}
+  .modal-overlay.open{align-items:center}
+}
+</style>
 </head>
 <body>
 
-<!-- HEADER -->
-<header class="header">
-    <h1>FRITZ<span>.</span></h1>
-    <p>🍔 Cardápio Digital</p>
-</header>
-
-<!-- NAVEGAÇÃO -->
-<div class="nav-wrapper">
-    <nav class="nav-categories" id="navCategorias"></nav>
+<!-- ============================================================
+SPLASH SCREEN
+============================================================ -->
+<div class="splash" id="splash">
+  <div class="splash-logo"><span>FR</span></div>
+  <div class="splash-title">Fritz</div>
+  <div class="splash-sub">Cardápio Digital</div>
+  <div class="splash-loader"><div class="splash-loader-bar"></div></div>
 </div>
 
-<!-- CONTEÚDO -->
+<!-- ============================================================
+HEADER
+============================================================ -->
+<header class="header">
+  <div class="header-logo"><span>FR</span></div>
+  <h1>FRITZ<span>.</span></h1>
+  <p>🍔 Cardápio Digital</p>
+</header>
+
+<!-- ============================================================
+SEARCH
+============================================================ -->
+<div class="search-wrap">
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Buscar no cardápio..." autocomplete="off">
+  </div>
+</div>
+
+<!-- ============================================================
+NAVEGAÇÃO
+============================================================ -->
+<div class="nav-wrapper">
+  <nav class="nav-categories" id="navCategorias"></nav>
+</div>
+
+<!-- ============================================================
+CONTEÚDO
+============================================================ -->
 <div class="container" id="container"></div>
 
-<!-- WHATSAPP FLOAT -->
-<a class="whatsapp-float" href="https://wa.me/5511999999999?text=Olá!%20Gostaria%20de%20fazer%20um%20pedido" target="_blank" title="Faça seu pedido pelo WhatsApp">
-    &#128222;
+<!-- ============================================================
+CART FLOAT
+============================================================ -->
+<button class="cart-float" id="cartFloat" title="Ver carrinho">
+  🛒
+  <span class="cart-badge" id="cartBadge">0</span>
+</button>
+
+<!-- ============================================================
+WHATSAPP FLOAT
+============================================================ -->
+<a class="whatsapp-float visible" id="whatsappFloat"
+   href="https://wa.me/5511999999999?text=Ol%C3%A1!%20Gostaria%20de%20fazer%20um%20pedido"
+   target="_blank" title="Fale conosco">
+  💬
 </a>
 
+<!-- ============================================================
+MODAL PRODUTO
+============================================================ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent">
+    <div class="modal-handle"></div>
+    <div class="modal-logo"><span>FR</span></div>
+    <h3 id="modalNome"></h3>
+    <div class="modal-cat" id="modalCategoria"></div>
+    <div class="modal-desc" id="modalDesc"></div>
+    <div class="modal-preco" id="modalPreco"></div>
+
+    <div class="qty-wrap">
+      <button class="qty-btn minus" id="qtyMinus">−</button>
+      <span class="qty-num" id="qtyNum">1</span>
+      <button class="qty-btn plus" id="qtyPlus">+</button>
+    </div>
+    <div class="modal-subtotal">Subtotal: <strong id="modalSubtotal">R$ 0,00</strong></div>
+
+    <div class="modal-actions">
+      <button class="btn-cart" id="modalAddCart">🛒 Adicionar</button>
+      <button class="btn-reserve" id="modalReserve">📅 Reservar</button>
+    </div>
+    <div style="margin-top:8px;text-align:center">
+      <button class="btn-close-modal" id="modalClose">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+CART PAGE
+============================================================ -->
+<div class="cart-page" id="cartPage">
+  <div class="cart-header">
+    <button class="back-btn" id="cartBack">‹</button>
+    <h2>🛒 Carrinho</h2>
+    <button class="clear-btn" id="cartClear">Limpar</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer" id="cartFooter">
+    <div class="calc-row">
+      <span>Subtotal</span>
+      <span class="value" id="calcSubtotal">R$ 0,00</span>
+    </div>
+    <div class="calc-row taxa">
+      <span>Taxa de serviço (10%)</span>
+      <span class="value" id="calcTaxa">R$ 0,00</span>
+    </div>
+    <div class="calc-row taxa">
+      <span>Taxa de entrega</span>
+      <span class="value" id="calcEntrega">Grátis</span>
+    </div>
+    <div class="calc-row total">
+      <span>Total</span>
+      <span class="value" id="calcTotal">R$ 0,00</span>
+    </div>
+    <button class="cart-checkout" id="cartCheckout">📲 Finalizar Pedido via WhatsApp</button>
+  </div>
+</div>
+
+<!-- ============================================================
+TOAST
+============================================================ -->
+<div class="toast" id="toast">&nbsp;</div>
+
+<!-- ============================================================
+JAVASCRIPT
+============================================================ -->
 <script>
 // ============================================================
-// DADOS DO CARDÁPIO — EDITE AQUI!
+// DADOS DO CARDÁPIO
 // ============================================================
 const cardapio = {
-    pasteis: {
-        icon: '🥟',
-        nome: 'Pastéis',
-        itens: [
-            { nome: 'Pastel de Carne', desc: 'Carne moída temperada com cebola e salsinha', preco: 12.00 },
-            { nome: 'Pastel de Queijo', desc: 'Muçarela derretida', preco: 10.00 },
-            { nome: 'Pastel de Frango', desc: 'Frango desfiado com catupiry', preco: 12.00 },
-            { nome: 'Pastel de Pizza', desc: 'Calabresa, mussarela e orégano', preco: 13.00 },
-            { nome: 'Pastel de Palmito', desc: 'Palmito cremoso com azeitonas', preco: 14.00 },
-            { nome: 'Pastel Romeu e Julieta', desc: 'Queijo com goiabada', preco: 11.00 }
-        ]
-    },
-    lanches: {
-        icon: '🍔',
-        nome: 'Lanches',
-        itens: [
-            { nome: 'X-Burguer', desc: 'Hambúrguer, mussarela, alface e tomate', preco: 18.00 },
-            { nome: 'X-Salada', desc: 'Hambúrguer, mussarela, alface, tomate e maionese', preco: 20.00 },
-            { nome: 'X-Bacon', desc: 'Hambúrguer, mussarela, bacon crocante e salada', preco: 24.00 },
-            { nome: 'X-Calabresa', desc: 'Calabresa grelhada, mussarela, cebola e vinagrete', preco: 22.00 },
-            { nome: 'X-Frango', desc: 'Filé de frango grelhado, mussarela e salada', preco: 22.00 },
-            { nome: 'X-Egg', desc: 'Hambúrguer, ovo, mussarela e salada', preco: 20.00 }
-        ]
-    },
-    lanches_gourmet: {
-        icon: '🍔✨',
-        nome: 'Lanches Gourmet',
-        itens: [
-            { nome: 'Smash Burguer', desc: 'Hambúrguer 180g prensado na chapa, cheddar e barbecue', preco: 32.00 },
-            { nome: 'X-Fritz', desc: 'Hambúrguer artesanal 200g, queijo prato, bacon, onion rings e molho especial', preco: 36.00 },
-            { nome: 'X-Costela', desc: 'Costela desfiada, mussarela, barbecue e cebola caramelizada', preco: 34.00 },
-            { nome: 'X-Picanha', desc: 'Picanha fatiada, queijo coalho, alface e tomate', preco: 38.00 },
-            { nome: 'Monster Burguer', desc: 'Dois hambúrgueres 180g, cheddar, bacon, ovo e salada', preco: 42.00 }
-        ]
-    },
-    porcoes: {
-        icon: '🍟',
-        nome: 'Porções',
-        itens: [
-            { nome: 'Batata Frita', desc: 'Porção grande de batata sequinha', preco: 25.00 },
-            { nome: 'Batata com Cheddar e Bacon', desc: 'Batata frita coberta com cheddar e bacon', preco: 32.00 },
-            { nome: 'Onion Rings', desc: 'Anéis de cebola empanados e crocantes', preco: 28.00 },
-            { nome: 'Isca de Frango', desc: 'Tiras de frango empanadas com molho barbecue', preco: 35.00 },
-            { nome: 'Calabresa Acebolada', desc: 'Calabresa frita com cebola e pimentão', preco: 30.00 },
-            { nome: 'Mandioca Frita', desc: 'Mandioca macia por dentro, crocante por fora', preco: 28.00 },
-            { nome: 'Frango a Passarinho', desc: 'Pedacinhos de frango temperados e fritos', preco: 35.00 },
-            { nome: 'Tábua de Frios', desc: 'Muçarela, presunto, salame, azeitonas e pão', preco: 48.00 }
-        ]
-    },
-    pratos_executivos: {
-        icon: '🍽️',
-        nome: 'Pratos Executivos',
-        itens: [
-            { nome: 'Bife à Milanesa', desc: 'Bife empanado, arroz, feijão e fritas', preco: 32.00 },
-            { nome: 'Filé de Frango Grelhado', desc: 'Filé de frango, arroz, feijão e salada', preco: 30.00 },
-            { nome: 'Picanha Grelhada', desc: 'Picanha, arroz, farofa e vinagrete', preco: 45.00 },
-            { nome: 'Peixe à Dorê', desc: 'Filé de peixe empanado, arroz e salada', preco: 34.00 },
-            { nome: 'Strogonoff de Frango', desc: 'Strogonoff de frango com arroz e batata palha', preco: 32.00 },
-            { nome: 'Strogonoff de Carne', desc: 'Strogonoff de carne com arroz e batata palha', preco: 35.00 }
-        ]
-    },
-    chapeados: {
-        icon: '🥪',
-        nome: 'Chapeados',
-        itens: [
-            { nome: 'Misto Quente', desc: 'Presunto e mussarela no pão de forma', preco: 14.00 },
-            { nome: 'Queijo Quente', desc: 'Mussarela derretida no pão de forma', preco: 12.00 },
-            { nome: 'Bauru', desc: 'Rosbife, mussarela, tomate e orégano no pão francês', preco: 20.00 },
-            { nome: 'Chapa de Calabresa', desc: 'Calabresa com mussarela no pão francês', preco: 22.00 },
-            { nome: 'Filé Mignon na Chapa', desc: 'Filé mignon fatiado com mussarela no pão francês', preco: 28.00 }
-        ]
-    },
-    pizzas_salgadas: {
-        icon: '🍕',
-        nome: 'Pizzas Salgadas',
-        itens: [
-            { nome: 'Mussarela', desc: 'Molho de tomate, mussarela e orégano', preco: 35.00 },
-            { nome: 'Calabresa', desc: 'Calabresa fatiada, cebola e mussarela', preco: 38.00 },
-            { nome: 'Portuguesa', desc: 'Presunto, mussarela, ovo, cebola, pimentão e azeitona', preco: 40.00 },
-            { nome: 'Frango com Catupiry', desc: 'Frango desfiado, catupiry e mussarela', preco: 42.00 },
-            { nome: 'Margherita', desc: 'Molho, mussarela, tomate e manjericão', preco: 38.00 },
-            { nome: 'Napolitana', desc: 'Molho, mussarela, tomate, parmesão e orégano', preco: 38.00 },
-            { nome: 'Quatro Queijos', desc: 'Mussarela, provolone, parmesão e catupiry', preco: 45.00 },
-            { nome: 'Bacon', desc: 'Mussarela, bacon crocante e cebola', preco: 40.00 }
-        ]
-    },
-    pizzas_especiais: {
-        icon: '🍕⭐',
-        nome: 'Pizzas Especiais',
-        itens: [
-            { nome: 'Pepperoni', desc: 'Mussarela e pepperoni fatiado', preco: 42.00 },
-            { nome: 'Lombo Canadense', desc: 'Lombo, mussarela, cebola e azeitona', preco: 44.00 },
-            { nome: 'Cheddar com Bacon', desc: 'Cheddar cremoso, bacon crocante e mussarela', preco: 44.00 },
-            { nome: 'Atum', desc: 'Atum sólido, cebola, mussarela e orégano', preco: 40.00 },
-            { nome: 'Palmito', desc: 'Palmito cremoso, mussarela e azeitonas', preco: 42.00 },
-            { nome: 'Veggie', desc: 'Brócolis, mussarela, tomate seco e palmito', preco: 42.00 }
-        ]
-    },
-    pizzas_gourmet: {
-        icon: '🍕👑',
-        nome: 'Pizzas Gourmet',
-        itens: [
-            { nome: 'Pizza de Filé Mignon', desc: 'Filé mignon, mussarela, catupiry e barbecue', preco: 58.00 },
-            { nome: 'Pizza de Camarão', desc: 'Camarões salteados, mussarela e catupiry', preco: 62.00 },
-            { nome: 'Pizza Trufada', desc: 'Mussarela, parmesão, cogumelos e azeite trufado', preco: 55.00 },
-            { nome: 'Pizza de Costela', desc: 'Costela desfiada, catupiry e cebola caramelizada', preco: 54.00 },
-            { nome: 'Pizza de Rúcula com Tomate Seco', desc: 'Rúcula fresca, tomate seco, mussarela e parmesão', preco: 50.00 },
-            { nome: 'Pizza de Parma', desc: 'Presunto de Parma, mussarela, rúcula e parmesão', preco: 60.00 }
-        ]
-    },
-    sobremesas: {
-        icon: '🍰',
-        nome: 'Sobremesas',
-        itens: [
-            { nome: 'Pudim', desc: 'Pudim de leite condensado com calda de caramelo', preco: 12.00 },
-            { nome: 'Brownie com Sorvete', desc: 'Brownie de chocolate com sorvete de creme', preco: 18.00 },
-            { nome: 'Petit Gâteau', desc: 'Bolo de chocolate com recheio cremoso e sorvete', preco: 22.00 },
-            { nome: 'Mousse de Maracujá', desc: 'Mousse aerado de maracujá com calda', preco: 14.00 },
-            { nome: 'Torta de Limão', desc: 'Massa crocante com creme de limão e merengue', preco: 16.00 },
-            { nome: 'Banana Split', desc: 'Sorvete, banana, calda de chocolate e castanhas', preco: 20.00 },
-            { nome: 'Açai', desc: 'Açai 300ml com granola e banana', preco: 18.00 }
-        ]
-    },
-    bebidas: {
-        icon: '🥤',
-        nome: 'Bebidas',
-        itens: [
-            { nome: 'Coca-Cola Lata', desc: '350ml', preco: 6.00 },
-            { nome: 'Coca-Cola KS', desc: '290ml', preco: 5.00 },
-            { nome: 'Guaraná Lata', desc: '350ml', preco: 6.00 },
-            { nome: 'Guaraná Antarctica', desc: '600ml', preco: 8.00 },
-            { nome: 'H2O Limoneto', desc: '500ml', preco: 7.00 },
-            { nome: 'Água Mineral', desc: '500ml sem gás', preco: 4.00 },
-            { nome: 'Água com Gás', desc: '500ml', preco: 4.50 },
-            { nome: 'Suco Lata', desc: 'Del Valle 300ml — maracujá, uva, pêssego', preco: 6.00 },
-            { nome: 'Energético', desc: 'Red Bull 250ml', preco: 15.00 }
-        ]
-    },
-    sucos_naturais: {
-        icon: '🍊',
-        nome: 'Sucos Naturais',
-        itens: [
-            { nome: 'Suco de Laranja', desc: 'Laranja fresca — copo 400ml', preco: 10.00 },
-            { nome: 'Suco de Limão', desc: 'Limão fresco — copo 400ml', preco: 8.00 },
-            { nome: 'Suco de Maracujá', desc: 'Maracujá natural — copo 400ml', preco: 10.00 },
-            { nome: 'Suco de Abacaxi', desc: 'Abacaxi natural com hortelã — copo 400ml', preco: 10.00 },
-            { nome: 'Suco Verde', desc: 'Couve, limão, gengibre e maçã — copo 400ml', preco: 12.00 },
-            { nome: 'Vitamina', desc: 'Banana, maçã ou mamão com leite — copo 400ml', preco: 12.00 }
-        ]
-    },
-    refrigerantes: {
-        icon: '🧃',
-        nome: 'Refrigerantes',
-        itens: [
-            { nome: 'Coca-Cola 1L', desc: '', preco: 10.00 },
-            { nome: 'Coca-Cola 2L', desc: '', preco: 14.00 },
-            { nome: 'Guaraná Antarctica 2L', desc: '', preco: 12.00 },
-            { nome: 'Fanta Laranja 2L', desc: '', preco: 12.00 },
-            { nome: 'Sprite 2L', desc: '', preco: 12.00 },
-            { nome: 'Coca-Cola Zero 1L', desc: '', preco: 10.00 }
-        ]
-    },
-    batidas_caseiras: {
-        icon: '🍹',
-        nome: 'Batidas Caseiras',
-        itens: [
-            { nome: 'Batida de Limão', desc: 'Limão, leite condensado e vodka', preco: 15.00 },
-            { nome: 'Batida de Maracujá', desc: 'Maracujá, leite condensado e vodca', preco: 15.00 },
-            { nome: 'Batida de Coco', desc: 'Leite de coco, leite condensado e vodka', preco: 16.00 },
-            { nome: 'Batida de Morango', desc: 'Morango, leite condensado e vodka', preco: 16.00 },
-            { nome: 'Batida de Amendoim', desc: 'Amendoim, leite condensado e cachaça', preco: 15.00 }
-        ]
-    },
-    destilados: {
-        icon: '🥃',
-        nome: 'Destilados',
-        itens: [
-            { nome: 'Vodka Smirnoff', desc: 'Garrafa 965ml', preco: 60.00 },
-            { nome: 'Vodka Absolut', desc: 'Garrafa 750ml', preco: 80.00 },
-            { nome: 'Whisky Jack Daniels', desc: 'Garrafa 750ml', preco: 110.00 },
-            { nome: 'Whisky Red Label', desc: 'Garrafa 1L', preco: 90.00 },
-            { nome: 'Whisky Black Label', desc: 'Garrafa 1L', preco: 140.00 },
-            { nome: 'Gin Bombay Sapphire', desc: 'Garrafa 750ml', preco: 90.00 },
-            { nome: 'Cachaça Salinas', desc: 'Garrafa 910ml', preco: 40.00 },
-            { nome: 'Conhaque Dreher', desc: 'Garrafa 910ml', preco: 35.00 },
-            { nome: 'Dose (vodka/whisky/cachaça)', desc: 'Dose 50ml', preco: 12.00 }
-        ]
-    },
-    caipirinha: {
-        icon: '🍸',
-        nome: 'Caipirinhas',
-        itens: [
-            { nome: 'Caipirinha de Limão', desc: 'Cachaça, limão, açúcar e gelo', preco: 18.00 },
-            { nome: 'Caipirinha de Morango', desc: 'Cachaça, morango, açúcar e gelo', preco: 20.00 },
-            { nome: 'Caipirinha de Maracujá', desc: 'Cachaça, maracujá, açúcar e gelo', preco: 20.00 },
-            { nome: 'Caipirinha de Kiwi', desc: 'Cachaça, kiwi, açúcar e gelo', preco: 22.00 },
-            { nome: 'Caipiroska de Limão', desc: 'Vodka, limão, açúcar e gelo', preco: 20.00 },
-            { nome: 'Caipiroska de Morango', desc: 'Vodka, morango, açúcar e gelo', preco: 22.00 },
-            { nome: 'Caipivodka de Frutas Vermelhas', desc: 'Vodka, frutas vermelhas, açúcar e gelo', preco: 25.00 }
-        ]
-    },
-    cervejas: {
-        icon: '🍺',
-        nome: 'Cervejas',
-        itens: [
-            { nome: 'Skol Lata', desc: '350ml', preco: 6.00 },
-            { nome: 'Brahma Lata', desc: '350ml', preco: 6.00 },
-            { nome: 'Antarctica Lata', desc: '350ml', preco: 6.00 },
-            { nome: 'Heineken Lata', desc: '350ml', preco: 9.00 },
-            { nome: 'Heineken Long Neck', desc: '330ml', preco: 10.00 },
-            { nome: 'Budweiser Lata', desc: '350ml', preco: 7.00 },
-            { nome: 'Stella Artois Long Neck', desc: '330ml', preco: 10.00 },
-            { nome: 'Corona Long Neck', desc: '330ml', preco: 11.00 },
-            { nome: 'Império Lata', desc: '350ml', preco: 7.00 },
-            { nome: 'Original Long Neck', desc: '600ml', preco: 12.00 }
-        ]
-    },
-    chopp_artesanal: {
-        icon: '🍻',
-        nome: 'Chopp Artesanal',
-        itens: [
-            { nome: 'Chopp Pilsen', desc: '300ml — Tradicional e refrescante', preco: 12.00 },
-            { nome: 'Chopp IPA', desc: '300ml — Amargor marcante e aroma cítrico', preco: 15.00 },
-            { nome: 'Chopp APA', desc: '300ml — Americana equilibrada e frutada', preco: 14.00 },
-            { nome: 'Chopp Stout', desc: '300ml — Escura encorpada com notas de café', preco: 15.00 },
-            { nome: 'Chopp Witbier', desc: '300ml — Trigo com toques de laranja e coentro', preco: 14.00 },
-            { nome: 'Chopp Munich', desc: '500ml — Cerveja clara e suave', preco: 18.00 },
-            { nome: 'Chopp Brahma', desc: '300ml — Clássico e gelado', preco: 8.00 }
-        ]
-    }
+  pasteis: {
+    icon:'🥟', nome:'Pastéis',
+    itens:[
+      {nome:'Pastel de Carne',desc:'Carne moída temperada com cebola e salsinha',preco:12},
+      {nome:'Pastel de Queijo',desc:'Muçarela derretida',preco:10},
+      {nome:'Pastel de Frango',desc:'Frango desfiado com catupiry',preco:12},
+      {nome:'Pastel de Pizza',desc:'Calabresa, mussarela e orégano',preco:13},
+      {nome:'Pastel de Palmito',desc:'Palmito cremoso com azeitonas',preco:14},
+      {nome:'Pastel Romeu e Julieta',desc:'Queijo com goiabada',preco:11}
+    ]
+  },
+  lanches: {
+    icon:'🍔', nome:'Lanches',
+    itens:[
+      {nome:'X-Burguer',desc:'Hambúrguer, mussarela, alface e tomate',preco:18},
+      {nome:'X-Salada',desc:'Hambúrguer, mussarela, alface, tomate e maionese',preco:20},
+      {nome:'X-Bacon',desc:'Hambúrguer, mussarela, bacon crocante e salada',preco:24},
+      {nome:'X-Calabresa',desc:'Calabresa grelhada, mussarela, cebola e vinagrete',preco:22},
+      {nome:'X-Frango',desc:'Filé de frango grelhado, mussarela e salada',preco:22},
+      {nome:'X-Egg',desc:'Hambúrguer, ovo, mussarela e salada',preco:20}
+    ]
+  },
+  lanches_gourmet: {
+    icon:'🍔✨', nome:'Lanches Gourmet',
+    itens:[
+      {nome:'Smash Burguer',desc:'Hambúrguer 180g prensado na chapa, cheddar e barbecue',preco:32},
+      {nome:'X-Fritz',desc:'Hambúrguer artesanal 200g, queijo prato, bacon, onion rings e molho especial',preco:36},
+      {nome:'X-Costela',desc:'Costela desfiada, mussarela, barbecue e cebola caramelizada',preco:34},
+      {nome:'X-Picanha',desc:'Picanha fatiada, queijo coalho, alface e tomate',preco:38},
+      {nome:'Monster Burguer',desc:'Dois hambúrgueres 180g, cheddar, bacon, ovo e salada',preco:42}
+    ]
+  },
+  porcoes: {
+    icon:'🍟', nome:'Porções',
+    itens:[
+      {nome:'Batata Frita',desc:'Porção grande de batata sequinha',preco:25},
+      {nome:'Batata c/ Cheddar e Bacon',desc:'Batata frita coberta com cheddar e bacon',preco:32},
+      {nome:'Onion Rings',desc:'Anéis de cebola empanados e crocantes',preco:28},
+      {nome:'Isca de Frango',desc:'Tiras de frango empanadas com molho barbecue',preco:35},
+      {nome:'Calabresa Acebolada',desc:'Calabresa frita com cebola e pimentão',preco:30},
+      {nome:'Mandioca Frita',desc:'Mandioca macia por dentro, crocante por fora',preco:28},
+      {nome:'Frango a Passarinho',desc:'Pedacinhos de frango temperados e fritos',preco:35},
+      {nome:'Tábua de Frios',desc:'Muçarela, presunto, salame, azeitonas e pão',preco:48}
+    ]
+  },
+  pratos_executivos: {
+    icon:'🍽️', nome:'Pratos Executivos',
+    itens:[
+      {nome:'Bife à Milanesa',desc:'Bife empanado, arroz, feijão e fritas',preco:32},
+      {nome:'Filé de Frango Grelhado',desc:'Filé de frango, arroz, feijão e salada',preco:30},
+      {nome:'Picanha Grelhada',desc:'Picanha, arroz, farofa e vinagrete',preco:45},
+      {nome:'Peixe à Dorê',desc:'Filé de peixe empanado, arroz e salada',preco:34},
+      {nome:'Strogonoff de Frango',desc:'Strogonoff de frango com arroz e batata palha',preco:32},
+      {nome:'Strogonoff de Carne',desc:'Strogonoff de carne com arroz e batata palha',preco:35}
+    ]
+  },
+  chapeados: {
+    icon:'🥪', nome:'Chapeados',
+    itens:[
+      {nome:'Misto Quente',desc:'Presunto e mussarela no pão de forma',preco:14},
+      {nome:'Queijo Quente',desc:'Mussarela derretida no pão de forma',preco:12},
+      {nome:'Bauru',desc:'Rosbife, mussarela, tomate e orégano no pão francês',preco:20},
+      {nome:'Chapa de Calabresa',desc:'Calabresa com mussarela no pão francês',preco:22},
+      {nome:'Filé Mignon na Chapa',desc:'Filé mignon fatiado com mussarela no pão francês',preco:28}
+    ]
+  },
+  pizzas_salgadas: {
+    icon:'🍕', nome:'Pizzas Salgadas',
+    itens:[
+      {nome:'Mussarela',desc:'Molho de tomate, mussarela e orégano',preco:35},
+      {nome:'Calabresa',desc:'Calabresa fatiada, cebola e mussarela',preco:38},
+      {nome:'Portuguesa',desc:'Presunto, mussarela, ovo, cebola, pimentão e azeitona',preco:40},
+      {nome:'Frango com Catupiry',desc:'Frango desfiado, catupiry e mussarela',preco:42},
+      {nome:'Margherita',desc:'Molho, mussarela, tomate e manjericão',preco:38},
+      {nome:'Napolitana',desc:'Molho, mussarela, tomate, parmesão e orégano',preco:38},
+      {nome:'Quatro Queijos',desc:'Mussarela, provolone, parmesão e catupiry',preco:45},
+      {nome:'Bacon',desc:'Mussarela, bacon crocante e cebola',preco:40}
+    ]
+  },
+  pizzas_especiais: {
+    icon:'🍕⭐', nome:'Pizzas Especiais',
+    itens:[
+      {nome:'Pepperoni',desc:'Mussarela e pepperoni fatiado',preco:42},
+      {nome:'Lombo Canadense',desc:'Lombo, mussarela, cebola e azeitona',preco:44},
+      {nome:'Cheddar com Bacon',desc:'Cheddar cremoso, bacon crocante e mussarela',preco:44},
+      {nome:'Atum',desc:'Atum sólido, cebola, mussarela e orégano',preco:40},
+      {nome:'Palmito',desc:'Palmito cremoso, mussarela e azeitonas',preco:42},
+      {nome:'Veggie',desc:'Brócolis, mussarela, tomate seco e palmito',preco:42}
+    ]
+  },
+  pizzas_gourmet: {
+    icon:'🍕👑', nome:'Pizzas Gourmet',
+    itens:[
+      {nome:'Pizza de Filé Mignon',desc:'Filé mignon, mussarela, catupiry e barbecue',preco:58},
+      {nome:'Pizza de Camarão',desc:'Camarões salteados, mussarela e catupiry',preco:62},
+      {nome:'Pizza Trufada',desc:'Mussarela, parmesão, cogumelos e azeite trufado',preco:55},
+      {nome:'Pizza de Costela',desc:'Costela desfiada, catupiry e cebola caramelizada',preco:54},
+      {nome:'Pizza de Rúcula c/ Tomate Seco',desc:'Rúcula fresca, tomate seco, mussarela e parmesão',preco:50},
+      {nome:'Pizza de Parma',desc:'Presunto de Parma, mussarela, rúcula e parmesão',preco:60}
+    ]
+  },
+  sobremesas: {
+    icon:'🍰', nome:'Sobremesas',
+    itens:[
+      {nome:'Pudim',desc:'Pudim de leite condensado com calda de caramelo',preco:12},
+      {nome:'Brownie com Sorvete',desc:'Brownie de chocolate com sorvete de creme',preco:18},
+      {nome:'Petit Gâteau',desc:'Bolo de chocolate com recheio cremoso e sorvete',preco:22},
+      {nome:'Mousse de Maracujá',desc:'Mousse aerado de maracujá com calda',preco:14},
+      {nome:'Torta de Limão',desc:'Massa crocante com creme de limão e merengue',preco:16},
+      {nome:'Banana Split',desc:'Sorvete, banana, calda de chocolate e castanhas',preco:20},
+      {nome:'Açai',desc:'Açai 300ml com granola e banana',preco:18}
+    ]
+  },
+  bebidas: {
+    icon:'🥤', nome:'Bebidas',
+    itens:[
+      {nome:'Coca-Cola Lata',desc:'350ml',preco:6},
+      {nome:'Coca-Cola KS',desc:'290ml',preco:5},
+      {nome:'Guaraná Lata',desc:'350ml',preco:6},
+      {nome:'Guaraná Antarctica',desc:'600ml',preco:8},
+      {nome:'H2O Limoneto',desc:'500ml',preco:7},
+      {nome:'Água Mineral',desc:'500ml sem gás',preco:4},
+      {nome:'Água com Gás',desc:'500ml',preco:4.5},
+      {nome:'Suco Lata',desc:'Del Valle 300ml',preco:6},
+      {nome:'Energético Red Bull',desc:'250ml',preco:15}
+    ]
+  },
+  sucos_naturais: {
+    icon:'🍊', nome:'Sucos Naturais',
+    itens:[
+      {nome:'Suco de Laranja',desc:'Laranja fresca — copo 400ml',preco:10},
+      {nome:'Suco de Limão',desc:'Limão fresco — copo 400ml',preco:8},
+      {nome:'Suco de Maracujá',desc:'Maracujá natural — copo 400ml',preco:10},
+      {nome:'Suco de Abacaxi',desc:'Abacaxi natural com hortelã — copo 400ml',preco:10},
+      {nome:'Suco Verde',desc:'Couve, limão, gengibre e maçã — copo 400ml',preco:12},
+      {nome:'Vitamina',desc:'Banana, maçã ou mamão com leite — copo 400ml',preco:12}
+    ]
+  },
+  refrigerantes: {
+    icon:'🧃', nome:'Refrigerantes',
+    itens:[
+      {nome:'Coca-Cola 1L',desc:'',preco:10},
+      {nome:'Coca-Cola 2L',desc:'',preco:14},
+      {nome:'Guaraná Antarctica 2L',desc:'',preco:12},
+      {nome:'Fanta Laranja 2L',desc:'',preco:12},
+      {nome:'Sprite 2L',desc:'',preco:12},
+      {nome:'Coca-Cola Zero 1L',desc:'',preco:10}
+    ]
+  },
+  batidas_caseiras: {
+    icon:'🍹', nome:'Batidas Caseiras',
+    itens:[
+      {nome:'Batida de Limão',desc:'Limão, leite condensado e vodka',preco:15},
+      {nome:'Batida de Maracujá',desc:'Maracujá, leite condensado e vodca',preco:15},
+      {nome:'Batida de Coco',desc:'Leite de coco, leite condensado e vodka',preco:16},
+      {nome:'Batida de Morango',desc:'Morango, leite condensado e vodka',preco:16},
+      {nome:'Batida de Amendoim',desc:'Amendoim, leite condensado e cachaça',preco:15}
+    ]
+  },
+  destilados: {
+    icon:'🥃', nome:'Destilados',
+    itens:[
+      {nome:'Vodka Smirnoff',desc:'Garrafa 965ml',preco:60},
+      {nome:'Vodka Absolut',desc:'Garrafa 750ml',preco:80},
+      {nome:'Whisky Jack Daniels',desc:'Garrafa 750ml',preco:110},
+      {nome:'Whisky Red Label',desc:'Garrafa 1L',preco:90},
+      {nome:'Whisky Black Label',desc:'Garrafa 1L',preco:140},
+      {nome:'Gin Bombay Sapphire',desc:'Garrafa 750ml',preco:90},
+      {nome:'Cachaça Salinas',desc:'Garrafa 910ml',preco:40},
+      {nome:'Conhaque Dreher',desc:'Garrafa 910ml',preco:35},
+      {nome:'Dose (vodka/whisky/cachaça)',desc:'Dose 50ml',preco:12}
+    ]
+  },
+  caipirinha: {
+    icon:'🍸', nome:'Caipirinhas',
+    itens:[
+      {nome:'Caipirinha de Limão',desc:'Cachaça, limão, açúcar e gelo',preco:18},
+      {nome:'Caipirinha de Morango',desc:'Cachaça, morango, açúcar e gelo',preco:20},
+      {nome:'Caipirinha de Maracujá',desc:'Cachaça, maracujá, açúcar e gelo',preco:20},
+      {nome:'Caipirinha de Kiwi',desc:'Cachaça, kiwi, açúcar e gelo',preco:22},
+      {nome:'Caipiroska de Limão',desc:'Vodka, limão, açúcar e gelo',preco:20},
+      {nome:'Caipiroska de Morango',desc:'Vodka, morango, açúcar e gelo',preco:22},
+      {nome:'Caipivodka de Frutas Vermelhas',desc:'Vodka, frutas vermelhas, açúcar e gelo',preco:25}
+    ]
+  },
+  cervejas: {
+    icon:'🍺', nome:'Cervejas',
+    itens:[
+      {nome:'Skol Lata',desc:'350ml',preco:6},
+      {nome:'Brahma Lata',desc:'350ml',preco:6},
+      {nome:'Antarctica Lata',desc:'350ml',preco:6},
+      {nome:'Heineken Lata',desc:'350ml',preco:9},
+      {nome:'Heineken Long Neck',desc:'330ml',preco:10},
+      {nome:'Budweiser Lata',desc:'350ml',preco:7},
+      {nome:'Stella Artois Long Neck',desc:'330ml',preco:10},
+      {nome:'Corona Long Neck',desc:'330ml',preco:11},
+      {nome:'Império Lata',desc:'350ml',preco:7},
+      {nome:'Original Long Neck',desc:'600ml',preco:12}
+    ]
+  },
+  chopp_artesanal: {
+    icon:'🍻', nome:'Chopp Artesanal',
+    itens:[
+      {nome:'Chopp Pilsen',desc:'300ml — Tradicional e refrescante',preco:12},
+      {nome:'Chopp IPA',desc:'300ml — Amargor marcante e aroma cítrico',preco:15},
+      {nome:'Chopp APA',desc:'300ml — Americana equilibrada e frutada',preco:14},
+      {nome:'Chopp Stout',desc:'300ml — Escura encorpada com notas de café',preco:15},
+      {nome:'Chopp Witbier',desc:'300ml — Trigo com toques de laranja e coentro',preco:14},
+      {nome:'Chopp Munich',desc:'500ml — Cerveja clara e suave',preco:18},
+      {nome:'Chopp Brahma',desc:'300ml — Clássico e gelado',preco:8}
+    ]
+  }
 };
 
 // ============================================================
-// RENDERIZAÇÃO
+// CARRINHO (localStorage)
 // ============================================================
-const navEl = document.getElementById('navCategorias');
-const container = document.getElementById('container');
+let cart = JSON.parse(localStorage.getItem('fritz_cart') || '[]');
 
+function saveCart() {
+  localStorage.setItem('fritz_cart', JSON.stringify(cart));
+  updateCartBadge();
+}
+
+function updateCartBadge() {
+  const badge = document.getElementById('cartBadge');
+  const total = cart.reduce((s,i) => s + i.qty, 0);
+  if (total > 0) {
+    badge.style.display = 'flex';
+    badge.textContent = total;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// ============================================================
+// UTILITÁRIOS
+// ============================================================
 const keys = Object.keys(cardapio);
 let activeKey = keys[0];
+let searchQuery = '';
 
-function formatarPreco(valor) {
-    return `R$ ${valor.toFixed(2).replace('.', ',')}`;
-}
+function fmt(v){return 'R$ '+v.toFixed(2).replace('.',',')}
 
-function renderizar() {
-    // Nav
-    navEl.innerHTML = keys.map(key => {
-        const cat = cardapio[key];
-        const label = cat.icon ? `${cat.icon} ${cat.nome}` : cat.nome;
-        return `<button class="nav-btn${key === activeKey ? ' active' : ''}" data-key="${key}">${label}</button>`;
-    }).join('');
+// ============================================================
+// RENDER
+// ============================================================
+function render() {
+  // Nav
+  const navEl = document.getElementById('navCategorias');
+  navEl.innerHTML = keys.map(k => {
+    const c = cardapio[k];
+    return `<button class="nav-btn${k===activeKey?' active':''}" data-key="${k}">
+      ${c.icon||''} ${c.nome}
+    </button>`;
+  }).join('');
 
-    // Categorias
-    container.innerHTML = keys.map(key => {
-        const cat = cardapio[key];
-        return `
-            <div class="categoria${key === activeKey ? ' active' : ''}" id="cat-${key}">
-                <div class="cat-header">
-                    <span class="icon">${cat.icon || ''}</span>
-                    <h2>${cat.nome}</h2>
-                    <span class="count">${cat.itens.length} itens</span>
-                </div>
-                ${cat.itens.map(item => `
-                    <div class="item">
-                        <div class="item-info">
-                            <div class="item-nome">${item.nome}</div>
-                            ${item.desc ? `<div class="item-desc">${item.desc}</div>` : ''}
-                        </div>
-                        <div class="item-preco">${formatarPreco(item.preco)}</div>
-                    </div>
-                `).join('')}
+  // Conteúdo
+  const container = document.getElementById('container');
+  const q = searchQuery.toLowerCase().trim();
+
+  container.innerHTML = keys.map(k => {
+    const c = cardapio[k];
+    const filtered = q ? c.itens.filter(i =>
+      i.nome.toLowerCase().includes(q) || (i.desc||'').toLowerCase().includes(q)
+    ) : c.itens;
+
+    if (q && k !== activeKey) {
+      // show category only if it has matches
+      if (!filtered.length) return '';
+      // if matches exist, show it regardless of activeKey
+    }
+
+    const isActive = (k === activeKey) || (q && filtered.length > 0);
+    if (q && k !== activeKey && !filtered.length) return '';
+
+    return `
+      <div class="categoria${isActive?' active':''}" id="cat-${k}">
+        <div class="cat-header">
+          <span class="icon">${c.icon||''}</span>
+          <h2>${c.nome}</h2>
+          <span class="count">${filtered.length} itens</span>
+        </div>
+        ${filtered.length ? filtered.map(item => `
+          <div class="item" data-key="${k}" data-item="${item.nome}">
+            <div class="item-logo"><span>FR</span></div>
+            <div class="item-info">
+              <div class="item-nome">${item.nome}</div>
+              ${item.desc ? `<div class="item-desc">${item.desc}</div>` : ''}
+              <div class="item-bottom">
+                <span class="item-preco">${fmt(item.preco)}</span>
+                <button class="item-btn-add" data-add="${k}|${item.nome}">+ Add</button>
+              </div>
             </div>
-        `;
-    }).join('');
+          </div>
+        `).join('') : `
+          <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <p>Nenhum item encontrado para "<strong>${q}</strong>"</p>
+          </div>
+        `}
+      </div>`;
+  }).join('');
+
+  // Se pesquisa ativa, mostrar todas categorias com match
+  if (q) {
+    document.querySelectorAll('.categoria').forEach(el => {
+      const hasItems = el.querySelector('.item') !== null;
+      el.style.display = hasItems ? 'block' : 'none';
+    });
+  }
 }
 
-// Eventos de navegação
-document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.nav-btn');
-    if (!btn) return;
-    const key = btn.dataset.key;
-    if (!key || key === activeKey) return;
-
-    activeKey = key;
-
-    // Atualizar nav
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    // Atualizar categorias
-    document.querySelectorAll('.categoria').forEach(c => c.classList.remove('active'));
-    const target = document.getElementById(`cat-${key}`);
-    if (target) target.classList.add('active');
-
-    // Scroll suave pro topo do container
-    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+// ============================================================
+// NAVEGAÇÃO
+// ============================================================
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.nav-btn');
+  if (!btn) return;
+  const key = btn.dataset.key;
+  if (!key || key === activeKey) return;
+  activeKey = key;
+  searchQuery = '';
+  document.getElementById('searchInput').value = '';
+  render();
 });
 
-renderizar();
-</script>
+// ============================================================
+// SEARCH
+// ============================================================
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchQuery = e.target.value;
+  render();
+});
 
+// ============================================================
+// MODAL
+// ============================================================
+let modalItem = null;
+let modalKey = null;
+let modalQty = 1;
+
+function openModal(key, item) {
+  modalKey = key;
+  modalItem = item;
+  modalQty = 1;
+  document.getElementById('modalNome').textContent = item.nome;
+  document.getElementById('modalCategoria').textContent = cardapio[key].nome;
+  document.getElementById('modalDesc').textContent = item.desc || '';
+  document.getElementById('modalPreco').textContent = fmt(item.preco);
+  document.getElementById('qtyNum').textContent = '1';
+  updateModalSubtotal();
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function updateModalSubtotal() {
+  if (!modalItem) return;
+  const sub = modalItem.preco * modalQty;
+  document.getElementById('modalSubtotal').innerHTML = `Subtotal: <strong>${fmt(sub)}</strong>`;
+}
+
+document.getElementById('qtyMinus').addEventListener('click', () => {
+  if (modalQty > 1) { modalQty--; document.getElementById('qtyNum').textContent = modalQty; updateModalSubtotal(); }
+});
+document.getElementById('qtyPlus').addEventListener('click', () => {
+  modalQty++; document.getElementById('qtyNum').textContent = modalQty; updateModalSubtotal();
+});
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// Add to cart from modal
+document.getElementById('modalAddCart').addEventListener('click', () => {
+  if (!modalItem) return;
+  addToCart(modalKey, modalItem, modalQty);
+  closeModal();
+});
+
+// Reserve from modal
+document.getElementById('modalReserve').addEventListener('click', () => {
+  if (!modalItem) return;
+  addToCart(modalKey, modalItem, modalQty, true);
+  closeModal();
+  showToast('📅 Item reservado!');
+});
+
+// Helper: add to cart
+function addToCart(key, item, qty = 1, isReserve = false) {
+  const existing = cart.find(i => i.key === key && i.nome === item.nome && i.isReserve === !!isReserve);
+  if (existing) {
+    existing.qty += qty;
+  } else {
+    cart.push({
+      key,
+      nome: item.nome,
+      desc: item.desc || '',
+      preco: item.preco,
+      qty,
+      isReserve: !!isReserve
+    });
+  }
+  saveCart();
+  showToast(isReserve ? `📅 ${item.nome} reservado!` : `🛒 ${item.nome} adicionado!`);
+}
+
+// Click on item to open modal
+document.addEventListener('click', e => {
+  const addBtn = e.target.closest('[data-add]');
+  if (addBtn) {
+    e.stopPropagation();
+    const [k, n] = addBtn.dataset.add.split('|');
+    const item = cardapio[k].itens.find(i => i.nome === n);
+    if (item) { openModal(k, item); return; }
+  }
+
+  const itemEl = e.target.closest('.item');
+  if (itemEl && !e.target.closest('[data-add]')) {
+    const k = itemEl.dataset.key;
+    const n = itemEl.dataset.item;
+    const item = cardapio[k]?.itens.find(i => i.nome === n);
+    if (item) openModal(k, item);
+  }
+});
+
+// ============================================================
+// CARRINHO
+// ============================================================
+function openCart() {
+  renderCart();
+  document.getElementById('cartPage').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCart() {
+  document.getElementById('cartPage').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('cartFloat').addEventListener('click', openCart);
+document.getElementById('cartBack').addEventListener('click', closeCart);
+
+function renderCart() {
+  const el = document.getElementById('cartItems');
+  const footer = document.getElementById('cartFooter');
+
+  if (!cart.length) {
+    el.innerHTML = `
+      <div class="cart-empty">
+        <div class="empty-icon">🛒</div>
+        <p>Seu carrinho está vazio</p>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-top:4px">Toque em um item para adicionar</p>
+      </div>`;
+    footer.style.display = 'none';
+    return;
+  }
+  footer.style.display = 'block';
+
+  el.innerHTML = cart.map((item, idx) => `
+    <div class="cart-item">
+      <div class="cart-item-logo"><span>FR</span></div>
+      <div class="cart-item-info">
+        <div class="cinome">${item.nome} ${item.isReserve ? '<span style="color:var(--gold);font-size:0.7rem">📅 Reserva</span>' : ''}</div>
+        <div class="cipreco">${fmt(item.preco)} un. · ${cardapio[item.key]?.nome||''}</div>
+      </div>
+      <div class="cart-item-qty">
+        <button data-dec="${idx}">−</button>
+        <span>${item.qty}</span>
+        <button data-inc="${idx}">+</button>
+      </div>
+      <button class="cart-item-remove" data-rm="${idx}">✕</button>
+    </div>
+  `).join('');
+
+  // Calcular
+  const sub = cart.reduce((s,i) => s + i.preco * i.qty, 0);
+  const taxa = sub * 0.1;
+  const total = sub + taxa;
+  document.getElementById('calcSubtotal').textContent = fmt(sub);
+  document.getElementById('calcTaxa').textContent = fmt(taxa);
+  document.getElementById('calcTotal').textContent = fmt(total);
+}
+
+// Cart item events
+document.addEventListener('click', e => {
+  const dec = e.target.closest('[data-dec]');
+  const inc = e.target.closest('[data-inc]');
+  const rm = e.target.closest('[data-rm]');
+
+  if (dec) {
+    const idx = +dec.dataset.dec;
+    if (cart[idx]) {
+      if (cart[idx].qty > 1) cart[idx].qty--;
+      else cart.splice(idx,1);
+      saveCart(); renderCart();
+    }
+  }
+  if (inc) {
+    const idx = +inc.dataset.inc;
+    if (cart[idx]) { cart[idx].qty++; saveCart(); renderCart(); }
+  }
+  if (rm) {
+    const idx = +rm.dataset.rm;
+    if (cart[idx]) { cart.splice(idx,1); saveCart(); renderCart(); }
+  }
+});
+
+document.getElementById('cartClear').addEventListener('click', () => {
+  if (cart.length === 0) return;
+  if (confirm('Limpar todo o carrinho?')) {
+    cart = [];
+    saveCart();
+    renderCart();
+    showToast('🔄 Carrinho limpo');
+  }
+});
+
+// ============================================================
+// CHECKOUT VIA WHATSAPP
+// ============================================================
+document.getElementById('cartCheckout').addEventListener('click', () => {
+  if (!cart.length) { showToast('🛒 Carrinho vazio!'); return; }
+
+  const sub = cart.reduce((s,i) => s + i.preco * i.qty, 0);
+  const taxa = sub * 0.1;
+  const total = sub + taxa;
+
+  let msg = '🍔 *PEDIDO FRITZ*\n';
+  msg += '━━━━━━━━━━━━━━━━━━━\n\n';
+  cart.forEach((item,i) => {
+    const subItem = item.preco * item.qty;
+    msg += `${i+1}. ${item.nome}`;
+    if (item.isReserve) msg += ' 📅';
+    msg += `\n   ${item.qty}x ${fmt(item.preco)} = ${fmt(subItem)}\n\n`;
+  });
+  msg += '━━━━━━━━━━━━━━━━━━━\n';
+  msg += `Subtotal: ${fmt(sub)}\n`;
+  msg += `Taxa 10%: ${fmt(taxa)}\n`;
+  msg += `*Total: ${fmt(total)}*\n\n`;
+  msg += '📍 *Retirada no local*\n';
+  msg += '⏱️ Informe o horário';
+
+  const url = 'https://wa.me/5511999999999?text=' + encodeURIComponent(msg);
+  window.open(url, '_blank');
+});
+
+// ============================================================
+// TOAST
+// ============================================================
+let toastTimer;
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.innerHTML = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ============================================================
+// SPLASH
+// ============================================================
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('hidden');
+  }, 1800);
+});
+
+// ============================================================
+// INIT
+// ============================================================
+render();
+updateCartBadge();
+</script>
 </body>
 </html>
